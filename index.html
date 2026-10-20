@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Buzón de Sugerencias y Solicitudes - Jornada Mixta</title>
+  <link rel="stylesheet" href="./estilo.css">
+</head>
+<body>
+
+  <div class="container">
+
+    <!-- SECCIÓN FORMULARIO -->
+    <div id="seccion-formulario">
+      <div style="text-align: center;">
+        <span class="header-badge">Representación Estudiantil</span>
+        <h1>Buzón de Sugerencias y Solicitudes</h1>
+        <p class="subtitle">Jornada Mixta | Construyamos soluciones juntos</p>
+      </div>
+
+      <div class="info-box">
+        💬 Tu voz es clave para mejorar nuestra jornada. Puedes identificarte o enviar tu aporte de manera <strong>100% anónima</strong>.
+      </div>
+
+      <form id="buzonForm">
+        <input type="hidden" name="_subject" value="¡Nueva solicitud/sugerencia recibida - Jornada Mixta!">
+        <input type="hidden" name="_template" value="table">
+
+        <!-- Modalidad de Envío -->
+        <div class="form-group">
+          <label>¿Cómo deseas enviar tu propuesta?</label>
+          <div class="radio-card-group">
+            <label class="radio-card">
+              <input type="radio" name="modalidad" value="Identificado" checked onclick="toggleDatos(true)">
+              Con mis datos
+            </label>
+            <label class="radio-card">
+              <input type="radio" name="modalidad" value="Anónimo" onclick="toggleDatos(false)">
+              Anónimo
+            </label>
+          </div>
+        </div>
+
+        <!-- Datos Personales -->
+        <div id="seccion-datos">
+          <div class="grid-2">
+            <div class="form-group">
+              <label for="nombre">Nombre completo <span class="optional-tag">(Opcional)</span></label>
+              <input type="text" id="nombre" name="nombre" placeholder="Ej: Natalia Peña">
+            </div>
+            <div class="form-group">
+              <label for="telefono">Celular / WhatsApp <span class="optional-tag">(Opcional)</span></label>
+              <input type="tel" id="telefono" name="telefono" placeholder="Ej: 3001234567">
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="form-group">
+              <label for="ficha">Número de Ficha *</label>
+              <input type="text" id="ficha" name="numero_ficha" placeholder="Ej: 2670123" required>
+            </div>
+            <div class="form-group">
+              <label for="programa">Programa de Formación *</label>
+              <input type="text" id="programa" name="programa_formacion" placeholder="Ej: ADSO" required>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mensaje / Solicitud -->
+        <div class="form-group">
+          <label for="solicitud">Exposición de tu solicitud, idea o sugerencia *</label>
+          <textarea id="solicitud" name="solicitud" placeholder="Describe claramente la situación, necesidad o propuesta que quieres que gestionemos para la jornada mixta..." required></textarea>
+        </div>
+
+        <button type="submit" id="btnEnviar" class="btn-submit">🚀 Enviar Mensaje</button>
+      </form>
+    </div>
+
+    <!-- SECCIÓN AGRADECIMIENTO INTEGRADA -->
+    <div id="seccion-gracias" style="display: none; text-align: center; padding: 2rem 1rem;">
+      <div style="font-size: 3.5rem; margin-bottom: 1rem;">🎉</div>
+      <h2 style="color: #1b5e20; margin-bottom: 0.5rem;">¡Solicitud Recibida!</h2>
+      <p style="color: #555; font-size: 1.05rem; line-height: 1.6; max-width: 500px; margin: 0 auto 1.5rem auto;">
+        Muchas gracias por compartir tu aporte. Tu mensaje ha sido enviado correctamente a la Representación Estudiantil de la Jornada Mixta.
+      </p>
+      <button type="button" class="btn-submit" onclick="reiniciarFormulario()" style="max-width: 280px; margin: 0 auto;">
+        ✍️ Enviar otra solicitud
+      </button>
+    </div>
+
+  </div>
+
+  <script>
+    function toggleDatos(mostrar) {
+      const seccion = document.getElementById('seccion-datos');
+      const inputNombre = document.getElementById('nombre');
+      const inputTelefono = document.getElementById('telefono');
+      const inputFicha = document.getElementById('ficha');
+      const inputPrograma = document.getElementById('programa');
+
+      if (!mostrar) {
+        inputNombre.value = 'Anónimo';
+        inputTelefono.value = 'Anónimo';
+        inputFicha.value = 'Anónimo';
+        inputPrograma.value = 'Anónimo';
+        seccion.style.opacity = '0.4';
+        seccion.style.pointerEvents = 'none';
+      } else {
+        inputNombre.value = '';
+        inputTelefono.value = '';
+        inputFicha.value = '';
+        inputPrograma.value = '';
+        seccion.style.opacity = '1';
+        seccion.style.pointerEvents = 'auto';
+      }
+    }
+
+    const form = document.getElementById('buzonForm');
+    const btnEnviar = document.getElementById('btnEnviar');
+    const seccionForm = document.getElementById('seccion-formulario');
+    const seccionGracias = document.getElementById('seccion-gracias');
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      btnEnviar.disabled = true;
+      btnEnviar.textContent = '⏳ Enviando...';
+
+      // Habilitar temporalmente los inputs deshabilitados para enviar los valores "Anónimo"
+      const inputs = form.querySelectorAll('#seccion-datos input');
+      inputs.forEach(input => input.disabled = false);
+
+      const formData = new FormData(form);
+
+      fetch('https://formsubmit.co/ajax/solicitudes.mixta@gmail.com', {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json'
+        },
+        body: formData
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success === "true" || data.success === true) {
+          seccionForm.style.display = 'none';
+          seccionGracias.style.display = 'block';
+        } else {
+          alert('Hubo un inconveniente al procesar el envío.');
+          btnEnviar.disabled = false;
+          btnEnviar.textContent = '🚀 Enviar Mensaje';
+        }
+      })
+      .catch(error => {
+        alert('Ocurrió un error al enviar el mensaje.');
+        btnEnviar.disabled = false;
+        btnEnviar.textContent = '🚀 Enviar Mensaje';
+      });
+    });
+
+    function reiniciarFormulario() {
+      form.reset();
+      toggleDatos(true);
+      btnEnviar.disabled = false;
+      btnEnviar.textContent = '🚀 Enviar Mensaje';
+      seccionGracias.style.display = 'none';
+      seccionForm.style.display = 'block';
+    }
+  </script>
+
+</body>
+</html>
